@@ -1,28 +1,18 @@
 import { useEffect, useRef } from 'react';
-import {
-  Map as MlMap,
-  Marker,
-  LngLatBounds,
-  type GeoJSONSource,
-  type StyleSpecification,
-} from 'maplibre-gl';
+import { Map as MlMap, Marker, LngLatBounds, type GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { LatLng } from '../lib/types';
 
-const OSM_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    osm: {
-      type: 'raster',
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      attribution: '&copy; OpenStreetMap contributors',
-    },
-  },
-  layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
-};
+/**
+ * CARTO's free "Positron" vector basemap: built from OpenStreetMap data but
+ * rendered with a deliberately minimal style (muted roads, no dashed paths
+ * or parcel/boundary clutter, sparse labels) so a route line stays legible
+ * on top of it. The default OSM "carto" raster tiles are far busier.
+ */
+const BASEMAP_STYLE_URL = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 const ROUTE_SOURCE_ID = 'route';
+const ROUTE_CASING_LAYER_ID = 'route-line-casing';
 const ROUTE_LAYER_ID = 'route-line';
 
 interface RouteGeoJSON {
@@ -52,7 +42,7 @@ export function MapView({ center, route, liveMarker, startMarker, zoom = 15 }: M
     if (!containerRef.current) return;
     const map = new MlMap({
       container: containerRef.current,
-      style: OSM_STYLE,
+      style: BASEMAP_STYLE_URL,
       center: [center.lng, center.lat],
       zoom,
       attributionControl: { compact: true },
@@ -91,12 +81,21 @@ export function MapView({ center, route, liveMarker, startMarker, zoom = 15 }: M
         source.setData(geojson);
       } else {
         map.addSource(ROUTE_SOURCE_ID, { type: 'geojson', data: geojson });
+        // A white casing under the route makes it pop off the basemap
+        // regardless of what's directly underneath (roads, paths, parks).
+        map.addLayer({
+          id: ROUTE_CASING_LAYER_ID,
+          type: 'line',
+          source: ROUTE_SOURCE_ID,
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#ffffff', 'line-width': 10, 'line-opacity': 0.95 },
+        });
         map.addLayer({
           id: ROUTE_LAYER_ID,
           type: 'line',
           source: ROUTE_SOURCE_ID,
           layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: { 'line-color': '#2563eb', 'line-width': 5, 'line-opacity': 0.85 },
+          paint: { 'line-color': '#2563eb', 'line-width': 6, 'line-opacity': 1 },
         });
       }
 

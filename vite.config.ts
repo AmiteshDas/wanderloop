@@ -32,12 +32,12 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
         runtimeCaching: [
           {
-            // OSM raster map tiles: cache-first so previously viewed areas work offline.
-            urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,
+            // CARTO basemap style/vector tiles/glyphs/sprites: cache-first so previously viewed areas work offline.
+            urlPattern: /^https:\/\/[a-z0-9-]*\.?cartocdn\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'osm-tiles',
-              expiration: { maxEntries: 2000, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheName: 'basemap-tiles',
+              expiration: { maxEntries: 4000, maxAgeSeconds: 60 * 60 * 24 * 30 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
