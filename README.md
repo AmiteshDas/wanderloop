@@ -5,7 +5,7 @@ Open the app, say how long you want to walk, get a loop route starting and endin
 ## Stack
 
 - Vite + React + TypeScript, built as an installable PWA (no app store needed)
-- MapLibre GL + OpenStreetMap raster tiles for the map
+- MapLibre GL + CARTO Positron (a free OpenStreetMap-based vector basemap with a deliberately minimal style, so the route stands out instead of competing with road casings/labels/dashed paths)
 - OSRM (public `routed-foot` demo instance, self-hostable later) for walking-profile routing
 - Saved walks stored locally in IndexedDB — no accounts, no server
 
